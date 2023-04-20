@@ -1,0 +1,41 @@
+[url "https://ghproxy.com/https://github"]
+        insteadOf = https://github
+[http]
+	sslVerify = false
+[init]
+        defaultBranch = master
+[safe]
+[http]
+        sslverify = false
+        lowSpeedLimit = 0
+        lowSpeedTime = 999999
+        postBuffer = 1048576000
+        version = HTTP/1.1
+[oh-my-zsh]
+        hide-status = 1
+        hide-dirty = 1
+[alias]
+        st = status -s --branch
+        co = checkout
+        ci = commit
+        ls = log --all --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%ci) %C(bold blue)<%an>%Creset' --abbrev-commit --date=relative
+[pull]
+        rebase = true
+[diff]
+    tool = meld
+[difftool]
+    prompt = false
+[difftool "meld"]
+    cmd = meld "$LOCAL" "$REMOTE"
+[merge]
+    tool = meld
+[mergetool "meld"]
+    # Choose one of these 2 lines
+    cmd = meld "$LOCAL" "$MERGED" "$REMOTE" --output "$MERGED"
+    #cmd = meld "$LOCAL" "$BASE" "$REMOTE" --output "$MERGED"
+[credential]
+        helper = store
+[commit]
+        template = ~/.gitmessage.txt
+[core]
+        excludesfile = ~/.gitignore

@@ -1,0 +1,3 @@
+.cache/
+.nvim/
+compile_commands.json
