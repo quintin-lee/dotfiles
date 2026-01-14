@@ -25,7 +25,8 @@ gaps outer 5
 
 # 移除冗余的标题栏（Hyprland 风格通常不带标题栏）
 default_border pixel 2
-default_floating_border normal
+default_floating_border pixel 2
+# default_floating_border normal
 smart_borders on
 
 # 设置主题颜色
@@ -34,7 +35,7 @@ client.focused #7aa2f7 #1a1b26 #ffffff #2e9ef4 #7aa2f7
 ### Output configuration
 #
 # Default wallpaper (more resolutions are available in /usr/share/backgrounds/sway/)
-output * bg /usr/share/backgrounds/sway/Sway_Wallpaper_Blue_1920x1080.png fill
+output * bg /home/quintin/Pictures/pexels-rpnickson-2559941.jpg fill
 #
 # Example configuration:
 #
@@ -100,6 +101,9 @@ output * bg /usr/share/backgrounds/sway/Sway_Wallpaper_Blue_1920x1080.png fill
     # Exit sway (logs you out of your Wayland session)
     bindsym $mod+Shift+e exec wlogout
     # bindsym $mod+Shift+e exec swaynag -t warning -m 'You pressed the exit shortcut. Do you really want to exit sway? This will end your Wayland session.' -B 'Yes, exit sway' 'swaymsg exit'
+
+# 截图快捷键
+bindsym Ctrl+Shift+x exec flameshot gui
 
 # 快捷键锁屏
 bindsym $mod+Alt+l exec swaylock --screenshots --clock --indicator --effect-blur 7x5
