@@ -76,3 +76,115 @@ pacman -Rsu $(comm -23 <(pacman -Qq | sort) <(sort pkglist.txt))
 ```
 
 更多信息请参见 [pacman archlinux wiki](https://wiki.archlinux.org/index.php/Pacman/Tips_and_tricks#Install_packages_from_a_list)
+
+## 工具配置及其依赖
+
+### Z Shell (ZSH)
+
+配置文件: `zsh/.zshrc`
+
+依赖:
+
+- **oh-my-zsh** - ZSH 框架
+- **zsh-syntax-highlighting** - ZSH 语法高亮插件
+- **zsh-autosuggestions** - ZSH 自动建议插件
+- **z plugin** - ZSH 目录跳转插件
+- **fzf-zsh-plugin** - ZSH 模糊查找插件
+- **fcitx5** - 输入法框架
+
+### Tmux
+
+配置文件: `tmux/.tmux.conf`
+
+依赖:
+
+- **tmux** - 终端复用器
+- **tmux plugin manager (tpm)** - Tmux 插件管理器
+- **tmux-resurrect** - Tmux 环境保存/恢复插件
+- **tmux-continuum** - Tmux 自动连续保存插件
+- **xsel 或 xclip** - 系统剪贴板访问工具
+- **perl** - 脚本处理工具
+- **sed** - 文本流处理器
+- **awk** - 文本处理语言
+
+### Neovim
+
+配置文件: `nvim/.config/nvim/`
+
+依赖:
+
+- **neovim** - Vim 文本编辑器的现代化版本
+
+### Kitty Terminal
+
+配置文件: `kitty/.config/kitty/`
+
+依赖:
+
+- **kitty** - GPU 加速终端模拟器
+- **JetBrains Mono Nerd Font** - 包含开发者图标的编程字体
+
+### Ranger File Manager
+
+配置文件: `ranger/.config/ranger/`
+
+依赖:
+
+- **ranger** - 终端文件管理器
+- **imagemagick** - 图像预览所需工具 (通过 scope.sh 脚本)
+- **各种系统工具** - 如 less, cat 等用于文件预览
+
+### Fcitx5 Input Method
+
+配置文件: `fcitx5/.config/fcitx5/`
+
+依赖:
+
+- **fcitx5** - 输入法框架
+
+### Sway Window Manager
+
+配置文件: `sway/.config/sway/config`
+
+依赖:
+
+- **sway** - Wayland 窗口管理器
+- **waybar** - 状态栏
+- **swayidle** - 电源管理工具
+- **swaylock** - 屏幕锁定工具
+- **wmenu-run** - 应用程序启动器
+- **wlogout** - 登出对话框
+- **flameshot** - 屏幕截图工具
+- **wireplumber/wpctl** - 管道服务器音频控制工具
+- **brightnessctl** - 亮度控制工具
+- **grim** - 屏幕截图工具
+- **pactl** - PulseAudio 控制工具
+- **dbus-update-activation-environment** - DBus 环境更新工具
+- **gnome-keyring-daemon** - GNOME 密钥环守护进程
+- **wl-paste** - Wayland 剪贴板工具
+- **cliphist** - 剪贴板历史管理器
+- **nm-applet** - 网络管理小程序
+- **polkit-gnome-authentication-agent-1** - 授权认证代理
+- **systemctl** - systemd 系统管理工具
+
+### Waybar Status Bar
+
+配置文件: `waybar/.config/waybar/`
+
+依赖:
+
+- **waybar** - 模块化状态栏
+- **JetBrainsMono Nerd Font** - 包含图标的编程字体
+- **fontawesome** - 字体图标集
+- **python** - Python 解释器 (用于自定义媒体播放器脚本)
+- **mpris 支持的媒体播放器** - 如 Spotify、VLC 等 (用于媒体模块)
+
+### Git
+
+配置文件: `git/.gitconfig`
+
+依赖:
+
+- **git** - 分布式版本控制系统
+- **meld** - 图形化差异比较和合并工具
+- **ghproxy.com** - GitHub 访问加速服务 (配置中使用)
