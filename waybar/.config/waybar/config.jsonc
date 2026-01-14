@@ -10,20 +10,20 @@
         "sway/workspaces",
         "sway/mode",
         "sway/scratchpad",
-        "custom/media"
-    ],
-    "modules-center": [
+        "custom/media",
         "sway/window"
     ],
+    "modules-center": [
+        "clock",
+        "battery"
+    ],
     "modules-right": [
-        "pulseaudio",
         "network",
+        "pulseaudio",
         "cpu",
         "memory",
         "temperature",
         "backlight",
-        "battery",
-        "clock",
         "tray",
         "custom/power"
     ],
