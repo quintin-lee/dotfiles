@@ -1,0 +1,112 @@
+* {
+    /* 建议安装 JetBrainsMono Nerd Font 以获得更好的图标支持 */
+    font-family: "JetBrainsMono Nerd Font", FontAwesome, Roboto, Helvetica, Arial, sans-serif;
+    font-size: 13px;
+    border: none;
+    border-radius: 0;
+}
+
+window#waybar {
+    /* 全透明背景，让模块看起来是悬浮的 */
+    background-color: rgba(0, 0, 0, 0);
+    color: #ffffff;
+    transition-property: background-color;
+    transition-duration: .5s;
+}
+
+/* 整个左/中/右区块的容器（可选） */
+.modules-left, .modules-center, .modules-right {
+    background: rgba(43, 48, 59, 0.5); /* 稍微深色的透明底 */
+    margin: 5px;
+    border-radius: 15px;
+    padding: 0 5px;
+}
+
+/* 工作区按钮美化 */
+#workspaces button {
+    padding: 0 8px;
+    background-color: transparent;
+    color: #ffffff;
+    border-radius: 12px;
+    margin: 3px 2px;
+    transition: all 0.3s ease;
+}
+
+#workspaces button:hover {
+    background: rgba(255, 255, 255, 0.2);
+    box-shadow: none; /* 去掉原始配置的横线 */
+}
+
+#workspaces button.focused {
+    background-color: #7aa2f7; /* 明亮的蓝色 */
+    color: #1a1b26;
+    font-weight: bold;
+}
+
+#workspaces button.urgent {
+    background-color: #f7768e;
+}
+
+/* 通用模块样式 - 胶囊化 */
+#clock,
+#battery,
+#cpu,
+#memory,
+#disk,
+#temperature,
+#backlight,
+#network,
+#pulseaudio,
+#wireplumber,
+#tray,
+#mode,
+#idle_inhibitor,
+#power-profiles-daemon {
+    padding: 0 12px;
+    margin: 4px 3px;
+    border-radius: 12px;
+    background-color: rgba(255, 255, 255, 0.1); /* 统一半透明背景 */
+    transition: background-color 0.2s;
+}
+
+/* 针对特定模块色彩微调（保持半透明） */
+#clock {
+    color: #c0caf5;
+    background-color: rgba(100, 114, 125, 0.3);
+}
+
+#battery.charging, #battery.plugged {
+    background-color: rgba(38, 166, 91, 0.6);
+}
+
+#battery.critical:not(.charging) {
+    background-color: rgba(245, 60, 60, 0.8);
+    animation-name: blink;
+    animation-duration: 0.5s;
+    animation-timing-function: steps(12);
+    animation-iteration-count: infinite;
+    animation-direction: alternate;
+}
+
+#cpu { background-color: rgba(46, 204, 113, 0.3); }
+#memory { background-color: rgba(155, 89, 182, 0.3); }
+#network { background-color: rgba(41, 128, 185, 0.3); }
+
+#pulseaudio {
+    background-color: rgba(241, 196, 15, 0.3);
+    color: #ffffff;
+}
+
+#pulseaudio.muted {
+    background-color: rgba(144, 177, 177, 0.3);
+}
+
+#tray {
+    background-color: rgba(41, 128, 185, 0.2);
+}
+
+/* 悬停反馈 */
+#clock:hover, #pulseaudio:hover, #network:hover {
+    background-color: rgba(255, 255, 255, 0.3);
+}
+
