@@ -71,8 +71,12 @@ window#waybar {
 
 /* 针对特定模块色彩微调（保持半透明） */
 #clock {
-    color: #c0caf5;
-    background-color: rgba(100, 114, 125, 0.3);
+    color: #ffffff; /* 换成纯白提高亮度 */
+    background-color: #24283b; /* 使用深色背景（例如 Tokyo Night 主题色） */
+    border-radius: 8px; /* 圆角让视觉更集中 */
+    padding: 0 10px;    /* 增加左右间距，避免文字太挤 */
+    margin: 4px 0;      /* 与边框保持距离 */
+    font-weight: bold;  /* 加粗字体 */
 }
 
 #battery.charging, #battery.plugged {
@@ -102,7 +106,7 @@ window#waybar {
 }
 
 #tray {
-    background-color: rgba(41, 128, 185, 0.2);
+    background-color: rgba(255, 255, 255, 0.5);
 }
 
 /* 悬停反馈 */
