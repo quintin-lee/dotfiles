@@ -10,7 +10,6 @@
         "sway/workspaces",
         "sway/mode",
         "sway/scratchpad",
-        "custom/media",
         "sway/window"
     ],
     "modules-center": [
@@ -18,6 +17,7 @@
         "battery"
     ],
     "modules-right": [
+        "custom/media",
         "network",
         "pulseaudio",
         "cpu",
@@ -54,7 +54,7 @@
 
     // --- 中间模块：窗口标题美化 ---
     "sway/window": {
-        "format": "   {title}", 
+        "format": " <span color='#ffffff'>|</span>  {title}", 
         "max-length": 45,
         "separate-outputs": true,
         "rewrite": {
