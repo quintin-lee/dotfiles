@@ -34,6 +34,8 @@ set $lock_cmd swaylock \
     --grace 2 \
     --fade-in 0.3
 
+# 设置主题
+set $gnome-schema org.gnome.desktop.interface
 ###############################################################################
 # 视觉美化 (Appearance)
 ###############################################################################
@@ -217,3 +219,8 @@ exec swayidle -w \
      before-sleep '$lock_cmd'
 
 include /etc/sway/config.d/*
+
+exec_always {
+    gsettings set $gnome-schema gtk-theme 'Adwaita-dark'
+    gsettings set $gnome-schema color-scheme 'prefer-dark'
+}
