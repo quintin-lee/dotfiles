@@ -92,7 +92,8 @@ exec gnome-keyring-daemon --start --components=secrets
 exec nm-applet --indicator
 
 # UI 增强
-exec_always pkill waybar; waybar
+exec_always sh -c "pkill waybar; sleep 0.5; waybar"
+
 exec mako # 通知守护进程
 
 # 剪贴板历史 (需要安装 cliphist)
