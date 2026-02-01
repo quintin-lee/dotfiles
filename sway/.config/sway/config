@@ -78,7 +78,7 @@ exec gnome-keyring-daemon --start --components=secrets
 exec nm-applet --indicator
 
 # UI 增强
-exec_always sh -c "pkill waybar; sleep 0.5; waybar"
+exec_always sh -c "killall -q kded6; pkill waybar; pkill swaybar; sleep 1; waybar"
 
 exec mako # 通知守护进程
 
@@ -226,4 +226,10 @@ include /etc/sway/config.d/*
 exec_always {
     gsettings set $gnome-schema gtk-theme 'Adwaita-dark'
     gsettings set $gnome-schema color-scheme 'prefer-dark'
+}
+
+# 禁用 Sway 内置 Bar 的托盘，防止与 Waybar 冲突
+bar {
+    mode invisible
+    tray_output none
 }
