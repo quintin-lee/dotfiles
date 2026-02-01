@@ -1,0 +1,16 @@
+# Swaylock configuration moved from sway config
+image=/home/quintin/Pictures/img3.wallspic.com-air-ta-apple-imac_qin-macos_mojave-5120x2880.jpg
+clock
+indicator
+indicator-radius=120
+indicator-thickness=10
+effect-blur=7x5
+effect-vignette=0.5:0.5
+ring-color=7aa2f7
+key-hl-color=bb9af7
+text-color=c0caf5
+line-color=00000000
+inside-color=1a1b2688
+separator-color=00000000
+grace=2
+fade-in=0.3

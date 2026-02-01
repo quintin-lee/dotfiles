@@ -17,22 +17,7 @@ set $files thunar
 set $bg_img ~/Pictures/pexels-pixabay-326055.jpg 
 set $lock_img ~/Pictures/img3.wallspic.com-air-ta-apple-imac_qin-macos_mojave-5120x2880.jpg
 
-set $lock_cmd swaylock \
-    -i $lock_img \
-    --clock \
-    --indicator \
-    --indicator-radius 120 \
-    --indicator-thickness 10 \
-    --effect-blur 7x5 \
-    --effect-vignette 0.5:0.5 \
-    --ring-color 7aa2f7 \
-    --key-hl-color bb9af7 \
-    --text-color c0caf5 \
-    --line-color 00000000 \
-    --inside-color 1a1b2688 \
-    --separator-color 00000000 \
-    --grace 2 \
-    --fade-in 0.3
+set $lock_cmd swaylock
 
 # 设置主题
 set $gnome-schema org.gnome.desktop.interface
@@ -85,6 +70,7 @@ input "type:keyboard" {
 # 环境修复
 exec dbus-update-activation-environment --all
 exec systemctl --user import-environment DISPLAY WAYLAND_DISPLAY SWAYSOCK
+exec dbus-update-activation-environment --systemd QT_QPA_PLATFORMTHEME=qt5ct
 
 # 核心守护进程
 exec /usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1
@@ -102,7 +88,7 @@ exec wl-paste --type image --watch cliphist store
 
 # 输入法 (Fcitx5)
 exec_always fcitx5 -d --replace
-exec_always env QT_IM_MODULE=fcitx QT_QPA_PLATFORM="wayland;xcb" albert
+# exec_always env QT_IM_MODULE=fcitx QT_QPA_PLATFORM="wayland;xcb" albert
 
 ###############################################################################
 # 快捷键绑定 (Keybindings)
@@ -187,12 +173,25 @@ for_window [app_id="pavucontrol"] floating enable, resize set 600 400
 for_window [app_id="nm-connection-editor"] floating enable
 for_window [app_id="bleman-manager"] floating enable
 for_window [title="Picture-in-Picture"] floating enable, sticky enable
-for_window [app_id="albert"] {
-    focus
-    floating enable
-    border none
-    sticky enable
-}
+# for_window [app_id="albert"] {
+#     focus
+#     floating enable
+#     border none
+#     sticky enable
+# }
+
+# 针对日志中捕获到的 utility 类型且 title 为 wechat 的子窗口
+# 禁止它在创建时自动获取焦点
+no_focus [class="wechat" instance="wechat" window_type="utility"]
+
+# 针对所有无标题或名为 wechat 的微信子窗口，强制浮动但禁止夺焦
+for_window [class="wechat" title="^wechat$"] floating enable, border none, focus disable
+for_window [class="wechat" title="^$"] floating enable, border none, focus disable
+
+focus_follows_mouse yes
+
+# 允许弹出窗口在被激活时获取焦点，但仅限于激活（防止自动抢焦）
+focus_on_window_activation none
 
 # 焦点分配
 no_focus [window_role="pop-up"]
