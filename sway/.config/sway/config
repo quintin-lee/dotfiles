@@ -141,12 +141,15 @@ bindsym $mod+Shift+3 move container to workspace number 3
 bindsym $mod+Shift+4 move container to workspace number 4
 bindsym $mod+Shift+5 move container to workspace number 5
 
-# 截图 (建议安装 grim, slurp, swappy)
-# 全屏截图
+# 截图 (建议安装 grim, slurp, swappy, wl-clipboard, flameshot)
+# 全屏截图 -> 保存文件
 bindsym Print exec grim ~/Pictures/$(date +%Y-%m-%d_%H-%m-%s).png
-# 选区截图并编辑
-bindsym $mod+Shift+s exec grim -g "$(slurp)" - | swappy -f -
+
+# Flameshot 截图 (Wayland 下建议配合 grim/slurp)
 bindsym Ctrl+Shift+x exec flameshot gui
+
+# 选区截图 -> 复制到剪贴板 + 打开编辑器 (备选)
+bindsym $mod+Shift+s exec grim -g "$(slurp)" - | tee >(wl-copy) | swappy -f -
 
 # 剪贴板历史记录
 bindsym $mod+v exec cliphist list | wofi --dmenu | cliphist decode | wl-copy
