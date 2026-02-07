@@ -21,6 +21,8 @@ set $lock_cmd swaylock
 
 # 设置主题
 set $gnome-schema org.gnome.desktop.interface
+
+seat seat0 xcursor_theme Breeze_Light 42
 ###############################################################################
 # 视觉美化 (Appearance)
 ###############################################################################
