@@ -1,10 +1,5 @@
-[url "https://ghproxy.com/https://github"]
-        insteadOf = https://github
-[http]
-	sslVerify = false
-[init]
-        defaultBranch = master
-[safe]
+# [url "https://ghproxy.com/https://github"]
+#         insteadOf = https://github
 [http]
         sslverify = false
         lowSpeedLimit = 0
@@ -15,10 +10,44 @@
         hide-status = 1
         hide-dirty = 1
 [alias]
-        st = status -s --branch
-        co = checkout
-        ci = commit
-        ls = log --all --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%ci) %C(bold blue)<%an>%Creset' --abbrev-commit --date=relative
+    co = checkout
+    ci = commit
+    st = status --branch --short
+    ls = log --all --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%ci) %C(bold blue)<%an>%Creset' --abbrev-commit --date=relative
+
+    # ---- 基础与状态增强 ----
+    cb = checkout -b
+    br = branch --sort=-committerdate
+    ds = diff --stat
+    dc = diff --cached
+    last = log -1 HEAD --stat -p
+
+    # ---- 快捷提交与修正 ----
+    ca = commit --amend                 # 允许修改最后一次 commit message
+    amend = commit --amend --no-edit    # 静默把当前改动并入上一次 commit
+    uncommit = reset --soft HEAD~1      # 撤销 commit，保留代码
+
+    # ---- 远端同步 ----
+    ph = push origin HEAD
+    pl = pull --rebase origin
+
+    # ---- 暂存管理 ----
+    ss = stash -u
+    sl = stash list
+    sa = stash apply
+
+    # ---- 快捷清理 ----
+    discard = !git reset --hard HEAD && git clean -fd
+    bcp = !"git fetch -p && git branch -vv | awk '/: gone]/ {print $1}' | xargs -r git branch -d"
+[filter "lfs"]
+	clean = git-lfs clean -- %f
+	smudge = git-lfs smudge -- %f
+	process = git-lfs filter-process
+	required = true
+[credential]
+	helper = store
+[init]
+	defaultBranch = master
 [pull]
         rebase = true
 [diff]
