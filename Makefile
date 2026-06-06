@@ -1,6 +1,7 @@
 STOW_DIR  := $(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))
 TARGET    := $(HOME)
 PACKAGES  := $(filter-out scripts,$(patsubst %/,%,$(patsubst $(STOW_DIR)/%,%,$(wildcard $(STOW_DIR)/*/))))
+SHELL     := /bin/bash
 
 # 包分组
 GUI_PKGS  := sway swaylock waybar kitty hypr
