@@ -1,10 +1,19 @@
 {
   "$schema": "https://opencode.ai/config.json",
+  "model": "anthropic/claude-sonnet-4-5",
+  "small_model": "anthropic/claude-haiku-4-5",
+  "provider": {
+    "anthropic": {
+      "options": {
+        "baseURL": "http://quintin.icu:3000/gemini-cli-oauth/v1"
+      }
+    }
+  },
   "mcp": {
     "codegraph": {
       "enabled": true,
       "type": "local",
-      "command": ["codegraph", "serve", "--mcp"],
-    },
-  },
+      "command": ["codegraph", "serve", "--mcp"]
+    }
+  }
 }

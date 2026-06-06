@@ -271,3 +271,49 @@ skills:
 	else \
 		echo "[-] 需要 bun: https://bun.sh"; \
 	fi
+
+## 验证 AI 配置 (env + opencode 启动)
+ai-check:
+	@echo "=== secrets 文件 ==="
+	@if [ -f ~/.config/zsh/ai-secrets.sh ]; then \
+		mode=$$(stat -c %a ~/.config/zsh/ai-secrets.sh); \
+		echo "  ~/.config/zsh/ai-secrets.sh (mode $$mode)"; \
+		if [ "$$mode" != "600" ]; then echo "  [!] 权限不是 600，请运行 chmod 600"; fi; \
+		exports=$$(grep -cE "^[[:space:]]*export" ~/.config/zsh/ai-secrets.sh); \
+		echo "  含 $$exports 个有效 export 语句"; \
+		if [ "$$exports" -eq 0 ]; then echo "  [!] 警告: 无有效 export, AI 工具无法认证"; fi; \
+	else \
+		echo "  [-] 文件不存在，请运行 make ai-init"; \
+	fi
+	@echo ""
+	@echo "=== 环境变量 ==="
+	@if env | grep -qE "ANTHROPIC|OPENAI|GEMINI"; then \
+		env | grep -E "ANTHROPIC|OPENAI|GEMINI" | sed 's/=.*/=***/'; \
+	else \
+		echo "  [-] 无 AI 环境变量, 请运行: source ~/.config/zsh/xdg.sh"; \
+	fi
+	@echo ""
+	@echo "=== opencode 配置 ==="
+	@if [ -f ~/.config/opencode/opencode.jsonc ]; then \
+		if grep -q '"model"' ~/.config/opencode/opencode.jsonc; then \
+			model=$$(grep '"model"' ~/.config/opencode/opencode.jsonc | head -1); \
+			echo "  [+] $$model"; \
+		else \
+			echo "  [-] 缺少 model 字段"; \
+		fi; \
+		if grep -q '"baseURL"' ~/.config/opencode/opencode.jsonc; then \
+			base=$$(grep '"baseURL"' ~/.config/opencode/opencode.jsonc | head -1); \
+			echo "  [+] $$base"; \
+		else \
+			echo "  [-] 缺少 baseURL (provider 未配置)"; \
+		fi; \
+	else \
+		echo "  [-] 文件不存在, 请运行 make restow"; \
+	fi
+	@echo ""
+	@echo "=== 代理连通性 ==="
+	@if [ -n "$$ANTHROPIC_BASE_URL" ]; then \
+		curl -sI -o /dev/null -w "  HTTP %{http_code}  ($$ANTHROPIC_BASE_URL)\n" --max-time 5 "$$ANTHROPIC_BASE_URL" 2>&1 || echo "  [-] 不可达"; \
+	else \
+		echo "  [i] 未设置 ANTHROPIC_BASE_URL"; \
+	fi
