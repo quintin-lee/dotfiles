@@ -2,20 +2,33 @@ STOW_DIR  := $(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))
 TARGET    := $(HOME)
 PACKAGES  := $(notdir $(wildcard $(STOW_DIR)/*/))
 
-.PHONY: help stow unstow restow adopt check verify list pkglist backup deps clean purge hooks install all
+# 包分组
+GUI_PKGS  := sway swaylock waybar kitty hypr
+CLI_PKGS  := zsh tmux ranger nvim
+IM_PKGS   := fcitx5
+TOOL_PKGS := git
 
-## 默认: stow 所有包
+.PHONY: help stow unstow restow adopt check verify list pkglist backup deps clean purge hooks install all
+.PHONY: stow-gui stow-cli stow-im stow-tool
+
+## 默认: 安装所有
 all: hooks stow
 
 ## 显示帮助
 help:
 	@echo "用法: make [target] [PKG=<包名>]"
 	@echo ""
-	@echo "部署:"
-	@echo "  stow       创建符号链接 (默认)"
+	@echo "部署 (单包):"
+	@echo "  stow       创建符号链接"
 	@echo "  unstow     移除符号链接"
 	@echo "  restow     重新创建符号链接"
 	@echo "  adopt      用本地文件覆盖仓库配置"
+	@echo ""
+	@echo "部署 (按组):"
+	@echo "  stow-gui   部署 GUI 应用 $(GUI_PKGS)"
+	@echo "  stow-cli   部署 CLI 工具 $(CLI_PKGS)"
+	@echo "  stow-im    部署输入法   $(IM_PKGS)"
+	@echo "  stow-tool  部署开发工具 $(TOOL_PKGS)"
 	@echo ""
 	@echo "维护:"
 	@echo "  check      检查冲突文件"
@@ -24,6 +37,7 @@ help:
 	@echo "  update     拉取 submodule 更新"
 	@echo "  submodule  初始化并更新 submodule"
 	@echo "  pkglist    导出当前系统安装的包列表"
+	@echo "  deps       从 pkglist.txt 安装软件"
 	@echo "  clean      清理临时文件"
 	@echo "  purge      删除包列表备份"
 	@echo "  hooks      安装 git hooks"
@@ -31,7 +45,10 @@ help:
 
 ## 列出所有包
 list:
-	@for p in $(PACKAGES); do echo "  $$p"; done
+	@echo "GUI:  $(GUI_PKGS)"
+	@echo "CLI:  $(CLI_PKGS)"
+	@echo "IM:   $(IM_PKGS)"
+	@echo "TOOL: $(TOOL_PKGS)"
 
 ## 初始化 submodule (nvim)
 submodule:
@@ -41,51 +58,55 @@ submodule:
 update: submodule
 	@if [ -f .gitmodules ]; then git submodule update --remote --recursive; fi
 
+## 共用 stow 函数: 对一组包执行 stow
+# 用法: $(call stow-group,目标名,包列表)
+define stow-group
+	@for p in $(2); do \
+		if [ -d "$(STOW_DIR)/$$p" ]; then \
+			echo "  ==> $(1): $$p"; \
+			stow -d $(STOW_DIR) -t $(TARGET) -S $$p 2>/dev/null || echo "    (跳过,可能已链接)"; \
+		fi; \
+	done
+endef
+
 ## 创建符号链接
 stow: submodule
-	@if [ "$(PKG)" ]; then \
-		stow -v -d $(STOW_DIR) -t $(TARGET) -S $(PKG); \
-	else \
-		for p in $(PACKAGES); do \
-			echo "==> stow $$p"; \
-			stow -v -d $(STOW_DIR) -t $(TARGET) -S $$p 2>/dev/null || true; \
-		done; \
-	fi
+	$(call stow-group,stow,$(PACKAGES))
+
+## 按组部署
+stow-gui: submodule
+	$(call stow-group,stow-gui,$(GUI_PKGS))
+
+stow-cli: submodule
+	$(call stow-group,stow-cli,$(CLI_PKGS))
+
+stow-im:
+	$(call stow-group,stow-im,$(IM_PKGS))
+
+stow-tool:
+	$(call stow-group,stow-tool,$(TOOL_PKGS))
 
 ## 移除符号链接
 unstow:
-	@if [ "$(PKG)" ]; then \
-		stow -v -d $(STOW_DIR) -t $(TARGET) -D $(PKG); \
-	else \
-		for p in $(PACKAGES); do \
-			stow -v -d $(STOW_DIR) -t $(TARGET) -D $$p || echo "warning: $$p 未链接，跳过"; \
-		done; \
-	fi
+	@for p in $(PACKAGES); do \
+		stow -d $(STOW_DIR) -t $(TARGET) -D $$p || echo "  未链接: $$p"; \
+	done
 
 ## 重新链接
 restow: unstow stow
 
 ## 用本地文件覆盖仓库配置 (首次收集或迁移时使用)
 adopt:
-	@if [ "$(PKG)" ]; then \
-		stow -v --adopt -d $(STOW_DIR) -t $(TARGET) -S $(PKG); \
-		echo "检查 git diff $(PKG) 查看本地改动"; \
-	else \
-		for p in $(PACKAGES); do \
-			stow -v --adopt -d $(STOW_DIR) -t $(TARGET) -S $$p; \
-		done; \
-		echo "所有包已采纳，使用 git diff 检查差异"; \
-	fi
+	@for p in $(PACKAGES); do \
+		stow --adopt -d $(STOW_DIR) -t $(TARGET) -S $$p || true; \
+	done
+	@echo "[+] 完成，使用 git diff 检查差异"
 
 ## 检查冲突
 check:
-	@if [ "$(PKG)" ]; then \
-		stow -n -v -d $(STOW_DIR) -t $(TARGET) -S $(PKG); \
-	else \
-		for p in $(PACKAGES); do \
-			stow -n -v -d $(STOW_DIR) -t $(TARGET) -S $$p; \
-		done; \
-	fi
+	@for p in $(PACKAGES); do \
+		stow -n -v -d $(STOW_DIR) -t $(TARGET) -S $$p 2>&1; \
+	done
 
 ## 验证符号链接完整性
 verify:
@@ -123,7 +144,7 @@ deps:
 		echo "[-] pkglist.txt 不存在，请先执行 make pkglist"; \
 	fi
 
-## 移除孤儿包
+## 备份
 backup: pkglist
 	@echo "[+] 备份完成"
 
