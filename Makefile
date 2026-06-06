@@ -2,10 +2,10 @@ STOW_DIR  := $(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))
 TARGET    := $(HOME)
 PACKAGES  := $(notdir $(wildcard $(STOW_DIR)/*/))
 
-.PHONY: help stow unstow restow adopt check verify list pkglist backup deps clean purge all
+.PHONY: help stow unstow restow adopt check verify list pkglist backup deps clean purge hooks install all
 
 ## 默认: stow 所有包
-all: submodule stow
+all: hooks stow
 
 ## 显示帮助
 help:
@@ -26,6 +26,8 @@ help:
 	@echo "  pkglist    导出当前系统安装的包列表"
 	@echo "  clean      清理临时文件"
 	@echo "  purge      删除包列表备份"
+	@echo "  hooks      安装 git hooks"
+	@echo "  install    完整安装 (submodule + stow + hooks)"
 
 ## 列出所有包
 list:
@@ -133,3 +135,15 @@ clean:
 ## 删除包列表备份
 purge:
 	rm -f $(STOW_DIR)/pkglist.txt
+
+## 安装 git hooks
+hooks:
+	@for hook in $(STOW_DIR)/scripts/hooks/*; do \
+		name=$$(basename $$hook); \
+		cp $$hook $(STOW_DIR)/.git/hooks/$$name; \
+		chmod +x $(STOW_DIR)/.git/hooks/$$name; \
+		echo "  installed .git/hooks/$$name"; \
+	done
+
+## 完整安装
+install: submodule hooks stow

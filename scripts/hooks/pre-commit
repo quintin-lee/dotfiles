@@ -1,0 +1,60 @@
+#!/usr/bin/env bash
+# Pre-commit hook: 阻止大文件、密钥和敏感配置误提交
+set -euo pipefail
+
+STAGED=$(git diff --cached --name-only --diff-filter=ACM)
+FAIL=0
+
+# 1. 大文件检查 (>1MB)
+while IFS= read -r f; do
+    [ -z "$f" ] && continue
+    if [ -f "$f" ]; then
+        size=$(stat -c%s "$f" 2>/dev/null || stat -f%z "$f")
+        if [ "$size" -gt 1048576 ]; then
+            echo "大文件: $f ($((size / 1024)) KB)"
+            FAIL=1
+        fi
+    fi
+done <<< "$STAGED"
+
+# 2. 密钥扫描
+PATTERNS=(
+    'AKIA[0-9A-Z]{16}'
+    'ghp_[A-Za-z0-9]{36,}'
+    'gho_[A-Za-z0-9]{36,}'
+    'ghs_[A-Za-z0-9]{36,}'
+    'ghr_[A-Za-z0-9]{36,}'
+    'github_pat_[A-Za-z0-9_]{82,}'
+    'xox[baprs]-[A-Za-z0-9-]{10,}'
+    '-----BEGIN (RSA|EC|OPENSSH|PRIVATE) (KEY|ENCRYPTED)'
+    '(api|secret|token|password|passwd|pwd)[\s]*=[\s]*["'"'"'][^"'"'"']{16,}'
+)
+
+while IFS= read -r f; do
+    [ -z "$f" ] && continue
+    [ -f "$f" ] || continue
+    for pat in "${PATTERNS[@]}"; do
+        if grep -IPl "$pat" "$f" 2>/dev/null | grep -q .; then
+            echo "疑似密钥: $f (模式: ${pat:0:30}...)"
+            FAIL=1
+        fi
+    done
+done <<< "$STAGED"
+
+# 3. 阻止 .gitconfig.local 误提交
+if echo "$STAGED" | grep -q '\.gitconfig\.local$'; then
+    echo ".gitconfig.local 不应提交 (使用 .gitconfig.local.example 作为模板)"
+    FAIL=1
+fi
+
+# 4. 阻止 SSH 私钥
+if echo "$STAGED" | grep -qE '\b(id_rsa|id_ed25519|id_ecdsa)\b|\.pem$|\.key$'; then
+    echo "检测到 SSH 私钥或密钥文件"
+    FAIL=1
+fi
+
+if [ "$FAIL" -ne 0 ]; then
+    echo ""
+    echo "提交被阻止。使用 git commit --no-verify 跳过 (不推荐)。"
+    exit 1
+fi
