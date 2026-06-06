@@ -2,6 +2,40 @@
 
 使用 [GNU Stow](https://www.gnu.org/software/stow/) 管理的 linux 配置文件.
 
+## 特性
+
+- 📦 基于 GNU Stow 的符号链接管理
+- 🛠️ Makefile 统一部署 (单包/分组/全量)
+- 🔒 敏感信息通过 `.gitconfig.local` 分离
+- 🚫 pre-commit hook 拦截密钥和大文件
+- ✅ GitHub Actions 自动验证 stow 部署
+- 📁 `.stow-local-ignore` 排除运行期文件
+
+## 目录结构
+
+```
+.
+├── Makefile              # 部署入口
+├── .gitconfig            # 通用 git 配置 (别名、工具)
+├── .gitconfig.local.example
+├── .gitignore            # 仓库级忽略
+├── .editorconfig         # 编辑器缩进规则
+├── .gitattributes        # 换行规则
+├── .github/workflows/    # CI
+├── scripts/hooks/        # pre-commit hook
+├── fcitx5/               # 输入法
+├── git/                  # git 通用配置
+├── hypr/                 # Hyprland
+├── kitty/                # 终端
+├── nvim/                 # Neovim (submodule)
+├── ranger/               # 文件管理器
+├── sway/                 # Sway 窗口管理器
+├── swaylock/             # 锁屏
+├── tmux/                 # tmux
+├── waybar/               # 状态栏
+└── zsh/                  # zsh
+```
+
 Gnu Stow 使用两个文件夹来管理两个文件树之间的映射，分别是：
 
 - `stow dir`：默认为当前文件夹
@@ -38,8 +72,12 @@ Gnu Stow 使用两个文件夹来管理两个文件树之间的映射，分别�
 本项目使用 `Makefile` 统一管理 stow 部署，常用命令：
 
 ```sh
-make              # 部署所有包 (stow + submodule)
+make              # 部署所有包 (stow + hooks)
 make PKG=zsh      # 只部署单个包
+make stow-gui     # 只部署 GUI 组 (sway, waybar, kitty, ...)
+make stow-cli     # 只部署 CLI 组 (zsh, tmux, ranger, nvim)
+make stow-im      # 只部署输入法 (fcitx5)
+make stow-tool    # 只部署开发工具 (git)
 make check        # 检查冲突
 make verify       # 验证符号链接
 make adopt        # 采纳本地文件覆盖仓库
@@ -48,6 +86,14 @@ make unstow       # 移除所有链接
 make pkglist      # 导出系统已安装包
 make deps         # 从 pkglist.txt 安装软件
 make help         # 查看完整帮助
+```
+
+首次在新机器部署：
+
+```sh
+git clone <repo> ~/dotfiles
+cd ~/dotfiles
+make install      # 等价于 submodule + hooks + stow
 ```
 
 如需手动调用 stow，等价命令是：
