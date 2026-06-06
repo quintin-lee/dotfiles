@@ -1,15 +1,16 @@
 STOW_DIR  := $(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))
 TARGET    := $(HOME)
-PACKAGES  := $(notdir $(wildcard $(STOW_DIR)/*/))
+PACKAGES  := $(filter-out scripts,$(patsubst %/,%,$(patsubst $(STOW_DIR)/%,%,$(wildcard $(STOW_DIR)/*/))))
 
 # 包分组
 GUI_PKGS  := sway swaylock waybar kitty hypr
 CLI_PKGS  := zsh tmux ranger nvim
 IM_PKGS   := fcitx5
 TOOL_PKGS := git
+AI_PKGS   := ai
 
-.PHONY: help stow unstow restow adopt check verify list pkglist backup deps clean purge hooks install all
-.PHONY: stow-gui stow-cli stow-im stow-tool xdg-backup xdg-restore
+.PHONY: help stow unstow restow restow-fresh adopt check verify list pkglist backup deps clean purge hooks install all
+.PHONY: stow-gui stow-cli stow-im stow-tool stow-ai xdg-backup xdg-restore ai-init skills
 
 ## 默认: 安装所有
 all: hooks stow
@@ -29,6 +30,7 @@ help:
 	@echo "  stow-cli   部署 CLI 工具 $(CLI_PKGS)"
 	@echo "  stow-im    部署输入法   $(IM_PKGS)"
 	@echo "  stow-tool  部署开发工具 $(TOOL_PKGS)"
+	@echo "  stow-ai    部署 AI 工具 $(AI_PKGS)"
 	@echo ""
 	@echo "维护:"
 	@echo "  check      检查冲突文件"
@@ -44,6 +46,9 @@ help:
 	@echo "  install    完整安装 (submodule + stow + hooks)"
 	@echo "  xdg-backup  备份 XDG 状态/历史到当前目录"
 	@echo "  xdg-restore 从当前目录恢复 XDG 状态/历史"
+	@echo "  ai-init     初始化 AI 工具配置"
+	@echo "  skills      安装 AI skills"
+	@echo "  restow-fresh  强制重建为符号链接"
 
 ## 列出所有包
 list:
@@ -51,6 +56,7 @@ list:
 	@echo "CLI:  $(CLI_PKGS)"
 	@echo "IM:   $(IM_PKGS)"
 	@echo "TOOL: $(TOOL_PKGS)"
+	@echo "AI:   $(AI_PKGS)"
 
 ## 初始化 submodule (nvim)
 submodule:
@@ -66,20 +72,28 @@ define stow-group
 	@for p in $(2); do \
 		if [ -d "$(STOW_DIR)/$$p" ]; then \
 			echo "  ==> $(1): $$p"; \
-			stow -d $(STOW_DIR) -t $(TARGET) -S $$p 2>/dev/null || echo "    (跳过,可能已链接)"; \
+			stow --dotfiles -d $(STOW_DIR) -t $(TARGET) -S $$p 2>/dev/null || echo "    (跳过,可能已链接)"; \
 		fi; \
 	done
 endef
 
 ## 创建符号链接
-stow: submodule
-	$(call stow-group,stow,$(PACKAGES))
+stow:
+	@if [ -n "$(PKG)" ]; then \
+		echo "  ==> stow: $(PKG)"; \
+		stow --dotfiles -d $(STOW_DIR) -t $(TARGET) -S $(PKG) 2>/dev/null || echo "    (跳过,可能已链接)"; \
+	else \
+		for p in $(PACKAGES); do \
+			echo "  ==> stow: $$p"; \
+			stow --dotfiles -d $(STOW_DIR) -t $(TARGET) -S $$p 2>/dev/null || echo "    (跳过,可能已链接)"; \
+		done; \
+	fi
 
 ## 按组部署
-stow-gui: submodule
+stow-gui:
 	$(call stow-group,stow-gui,$(GUI_PKGS))
 
-stow-cli: submodule
+stow-cli:
 	$(call stow-group,stow-cli,$(CLI_PKGS))
 
 stow-im:
@@ -87,6 +101,9 @@ stow-im:
 
 stow-tool:
 	$(call stow-group,stow-tool,$(TOOL_PKGS))
+
+stow-ai:
+	$(call stow-group,stow-ai,$(AI_PKGS))
 
 ## 移除符号链接
 unstow:
@@ -96,6 +113,24 @@ unstow:
 
 ## 重新链接
 restow: unstow stow
+
+## 强制重建 (删除目标真实文件后重建)
+restow-fresh:
+	@for p in $(PACKAGES); do \
+		if [ ! -d "$$p" ]; then continue; fi; \
+		while IFS= read -r f; do \
+			[ "$$f" = "./.gitignore" ] && continue; \
+			case "$$f" in \
+				*/dot-*) f=$$(echo "$$f" | sed 's|/dot-|/.|g') ;; \
+			esac; \
+			target="$(TARGET)/$${f#./}"; \
+			if [ -e "$$target" ] && [ ! -L "$$target" ]; then \
+				echo "  移除真实文件: $$target"; \
+				rm -f "$$target"; \
+			fi; \
+		done < <(cd $$p && find . -type f -not -name ".stow-local-ignore"); \
+	done
+	$(MAKE) stow
 
 ## 用本地文件覆盖仓库配置 (首次收集或迁移时使用)
 adopt:
@@ -112,24 +147,33 @@ check:
 
 ## 验证符号链接完整性
 verify:
-	@broken=0; \
+	@broken=0; nonlink=0; \
 	for p in $(PACKAGES); do \
 		if [ ! -d "$$p" ]; then continue; fi; \
 		while IFS= read -r f; do \
-			target="$(TARGET)/$$f"; \
-			if [ ! -L "$$target" ]; then \
+			[ "$$f" = "./.gitignore" ] && continue; \
+			case "$$f" in \
+				*/dot-*) f=$$(echo "$$f" | sed 's|/dot-|/.|g') ;; \
+			esac; \
+			target="$(TARGET)/$${f#./}"; \
+			if [ ! -e "$$target" ]; then \
 				echo "  缺失: $$target"; \
 				broken=$$((broken + 1)); \
-			elif [ ! -e "$$target" ]; then \
+			elif [ -L "$$target" ] && [ ! -e "$$target" ]; then \
 				echo "  悬空: $$target -> $$(readlink $$target)"; \
 				broken=$$((broken + 1)); \
+			elif [ ! -L "$$target" ]; then \
+				echo "  非符号链接: $$target"; \
+				nonlink=$$((nonlink + 1)); \
 			fi; \
 		done < <(cd $$p && find . -type f -not -name ".stow-local-ignore"); \
 	done; \
-	if [ $$broken -eq 0 ]; then \
+	if [ $$broken -eq 0 ] && [ $$nonlink -eq 0 ]; then \
 		echo "[+] 所有符号链接健康"; \
+	elif [ $$broken -eq 0 ]; then \
+		echo "[!] $$nonlink 个非符号链接 (需 make restow-fresh)"; \
 	else \
-		echo "[-] 发现 $$broken 个问题链接，运行 make restow 修复"; \
+		echo "[-] $$broken 个缺失/悬空 (运行 make restow-fresh)"; \
 		exit 1; \
 	fi
 
@@ -183,3 +227,23 @@ xdg-restore:
 	@mkdir -p ~/.local/state/zsh
 	@cp -u /tmp/dotfiles-xdg-backup/state/zsh/history ~/.local/state/zsh/ 2>/dev/null || true
 	@echo "[+] 恢复完成"
+
+## 初始化 AI 工具配置
+ai-init:
+	@if [ ! -f ~/.config/zsh/ai-secrets.sh ]; then \
+		cp zsh/.config/zsh/ai-secrets.sh.example ~/.config/zsh/ai-secrets.sh; \
+		chmod 600 ~/.config/zsh/ai-secrets.sh; \
+		echo "[+] 已生成 ~/.config/zsh/ai-secrets.sh (请填入真实值)"; \
+	fi
+	@if [ ! -f ~/.claude/settings.json ]; then \
+		cp ai/.claude/settings.json.example ~/.claude/settings.json; \
+		echo "[+] 已生成 ~/.claude/settings.json (从模板)"; \
+	fi
+
+## 安装 AI skills
+skills:
+	@if command -v bun >/dev/null 2>&1; then \
+		bunx skills add obra/superpowers 2>&1 | tail -3; \
+	else \
+		echo "[-] 需要 bun: https://bun.sh"; \
+	fi

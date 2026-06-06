@@ -1,0 +1,3 @@
+# ~/.agents/.gitignore — skills 目录太大，不入库
+skills/
+.skill-lock.json

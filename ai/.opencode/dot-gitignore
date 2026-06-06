@@ -1,0 +1,8 @@
+# ~/.opencode/.gitignore — 忽略运行期文件
+skills/
+bin/
+node_modules/
+bun.lock
+package.json
+package-lock.json
+AGENT.md.local

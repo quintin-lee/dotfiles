@@ -1,0 +1,11 @@
+# ~/.claude/settings.json.example — Claude Code 配置模板
+# 真实 settings.json 不应提交 (含 API Token)
+# 使用 \`make ai-init\` 从本模板生成真实文件
+
+{
+  "attribution": {
+    "commit": "",
+    "pr": ""
+  },
+  "model": "opus"
+}

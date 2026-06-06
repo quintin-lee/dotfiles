@@ -1,0 +1,4 @@
+# 仅忽略运行期文件，保留配置文件
+node_modules/
+*.log
+.DS_Store

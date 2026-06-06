@@ -1,0 +1,12 @@
+# Claude Code 运行期文件 — 全部不提交
+settings.json
+history.jsonl
+sessions/
+backups/
+projects/
+cache/
+telemetry/
+ide/
+plugins/
+.update.lock
+.last-cleanup
