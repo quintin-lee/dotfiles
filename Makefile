@@ -116,8 +116,10 @@ restow: unstow stow
 
 ## 强制重建 (删除目标真实文件后重建)
 restow-fresh:
-	@for p in $(PACKAGES); do \
+	@tmp=$$(mktemp); \
+	for p in $(PACKAGES); do \
 		if [ ! -d "$$p" ]; then continue; fi; \
+		(cd $$p && find . -type f -not -name ".stow-local-ignore") > $$tmp; \
 		while IFS= read -r f; do \
 			[ "$$f" = "./.gitignore" ] && continue; \
 			case "$$f" in \
@@ -128,8 +130,9 @@ restow-fresh:
 				echo "  移除真实文件: $$target"; \
 				rm -f "$$target"; \
 			fi; \
-		done < <(cd $$p && find . -type f -not -name ".stow-local-ignore"); \
-	done
+		done < $$tmp; \
+	done; \
+	rm -f $$tmp
 	$(MAKE) stow
 
 ## 用本地文件覆盖仓库配置 (首次收集或迁移时使用)
@@ -147,9 +150,11 @@ check:
 
 ## 验证符号链接完整性
 verify:
-	@broken=0; nonlink=0; \
+	@out=$$(mktemp); \
 	for p in $(PACKAGES); do \
 		if [ ! -d "$$p" ]; then continue; fi; \
+		tmp=$$(mktemp); \
+		(cd $$p && find . -type f -not -name ".stow-local-ignore") > $$tmp; \
 		while IFS= read -r f; do \
 			[ "$$f" = "./.gitignore" ] && continue; \
 			case "$$f" in \
@@ -157,20 +162,23 @@ verify:
 			esac; \
 			target="$(TARGET)/$${f#./}"; \
 			if [ ! -e "$$target" ]; then \
-				echo "  缺失: $$target"; \
-				broken=$$((broken + 1)); \
+				echo "  缺失: $$target" >> $$out; \
 			elif [ -L "$$target" ] && [ ! -e "$$target" ]; then \
-				echo "  悬空: $$target -> $$(readlink $$target)"; \
-				broken=$$((broken + 1)); \
+				echo "  悬空: $$target -> $$(readlink $$target)" >> $$out; \
 			elif [ ! -L "$$target" ]; then \
-				echo "  非符号链接: $$target"; \
-				nonlink=$$((nonlink + 1)); \
+				echo "  非符号链接: $$target" >> $$out; \
 			fi; \
-		done < <(cd $$p && find . -type f -not -name ".stow-local-ignore"); \
+		done < $$tmp; \
+		rm -f $$tmp; \
 	done; \
-	if [ $$broken -eq 0 ] && [ $$nonlink -eq 0 ]; then \
+	cat $$out; \
+	broken=$$(grep -cE "^  (缺失|悬空):" $$out 2>/dev/null); \
+	nonlink=$$(grep -c "^  非符号链接:" $$out 2>/dev/null); \
+	: $${broken:=0}; : $${nonlink:=0}; \
+	rm -f $$out; \
+	if [ "$$broken" -eq 0 ] && [ "$$nonlink" -eq 0 ]; then \
 		echo "[+] 所有符号链接健康"; \
-	elif [ $$broken -eq 0 ]; then \
+	elif [ "$$broken" -eq 0 ]; then \
 		echo "[!] $$nonlink 个非符号链接 (需 make restow-fresh)"; \
 	else \
 		echo "[-] $$broken 个缺失/悬空 (运行 make restow-fresh)"; \
