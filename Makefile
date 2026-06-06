@@ -244,12 +244,25 @@ ai-init:
 	@if [ ! -f ~/.config/zsh/ai-secrets.sh ]; then \
 		cp zsh/.config/zsh/ai-secrets.sh.example ~/.config/zsh/ai-secrets.sh; \
 		chmod 600 ~/.config/zsh/ai-secrets.sh; \
-		echo "[+] 已生成 ~/.config/zsh/ai-secrets.sh (请填入真实值)"; \
+		echo "[+] 已生成 ~/.config/zsh/ai-secrets.sh"; \
+	else \
+		echo "[=] ~/.config/zsh/ai-secrets.sh 已存在"; \
+		if grep -qE "^[[:space:]]*#" ~/.config/zsh/ai-secrets.sh && ! grep -qE "^[[:space:]]*export" ~/.config/zsh/ai-secrets.sh; then \
+			echo "[!] 警告: secrets 文件全为注释，没有任何 export 语句"; \
+			echo "    必须取消注释并填入真实 API key 才能使用 AI 工具"; \
+		fi; \
 	fi
 	@if [ ! -f ~/.claude/settings.json ]; then \
 		cp ai/.claude/settings.json.example ~/.claude/settings.json; \
 		echo "[+] 已生成 ~/.claude/settings.json (从模板)"; \
+	else \
+		echo "[=] ~/.claude/settings.json 已存在"; \
 	fi
+	@echo ""
+	@echo "下一步:"
+	@echo "  1. 编辑 ~/.config/zsh/ai-secrets.sh 填入真实 API key"
+	@echo "  2. 重新加载: source ~/.config/zsh/xdg.sh"
+	@echo "  3. 测试: env | grep -E 'ANTHROPIC|OPENAI|GEMINI'"
 
 ## 安装 AI skills
 skills:
