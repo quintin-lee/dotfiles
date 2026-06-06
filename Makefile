@@ -2,7 +2,7 @@ STOW_DIR  := $(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))
 TARGET    := $(HOME)
 PACKAGES  := $(notdir $(wildcard $(STOW_DIR)/*/))
 
-.PHONY: help stow unstow restow adopt check list pkglist backup deps clean all
+.PHONY: help stow unstow restow adopt check verify list pkglist backup deps clean purge all
 
 ## 默认: stow 所有包
 all: submodule stow
@@ -19,11 +19,13 @@ help:
 	@echo ""
 	@echo "维护:"
 	@echo "  check      检查冲突文件"
+	@echo "  verify     验证符号链接完整性"
 	@echo "  list       列出所有可管理的包"
 	@echo "  update     拉取 submodule 更新"
 	@echo "  submodule  初始化并更新 submodule"
 	@echo "  pkglist    导出当前系统安装的包列表"
 	@echo "  clean      清理临时文件"
+	@echo "  purge      删除包列表备份"
 
 ## 列出所有包
 list:
@@ -54,8 +56,7 @@ unstow:
 		stow -v -d $(STOW_DIR) -t $(TARGET) -D $(PKG); \
 	else \
 		for p in $(PACKAGES); do \
-			echo "==> unstow $$p"; \
-			stow -v -d $(STOW_DIR) -t $(TARGET) -D $$p 2>/dev/null || true; \
+			stow -v -d $(STOW_DIR) -t $(TARGET) -D $$p || echo "warning: $$p 未链接，跳过"; \
 		done; \
 	fi
 
@@ -84,6 +85,29 @@ check:
 		done; \
 	fi
 
+## 验证符号链接完整性
+verify:
+	@broken=0; \
+	for p in $(PACKAGES); do \
+		if [ ! -d "$$p" ]; then continue; fi; \
+		while IFS= read -r f; do \
+			target="$(TARGET)/$$f"; \
+			if [ ! -L "$$target" ]; then \
+				echo "  缺失: $$target"; \
+				broken=$$((broken + 1)); \
+			elif [ ! -e "$$target" ]; then \
+				echo "  悬空: $$target -> $$(readlink $$target)"; \
+				broken=$$((broken + 1)); \
+			fi; \
+		done < <(cd $$p && find . -type f -not -name ".stow-local-ignore"); \
+	done; \
+	if [ $$broken -eq 0 ]; then \
+		echo "[+] 所有符号链接健康"; \
+	else \
+		echo "[-] 发现 $$broken 个问题链接，运行 make restow 修复"; \
+		exit 1; \
+	fi
+
 ## 导出当前系统安装的包列表
 pkglist:
 	pacman -Qqet > $(STOW_DIR)/pkglist.txt
@@ -101,6 +125,11 @@ deps:
 backup: pkglist
 	@echo "[+] 备份完成"
 
-## 清理
+## 清理临时文件
 clean:
+	find $(STOW_DIR) -type f \( -name "*.swp" -o -name "*.bak" -o -name "*~" \) -delete
+	@find $(STOW_DIR) -type d -name "__pycache__" -exec rm -rf {} + 2>/dev/null || true
+
+## 删除包列表备份
+purge:
 	rm -f $(STOW_DIR)/pkglist.txt
