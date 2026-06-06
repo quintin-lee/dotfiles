@@ -1,0 +1,22 @@
+# 编辑器临时文件
+*.swp
+*.swo
+*.bak
+*~
+.DS_Store
+
+# Python 字节码
+__pycache__/
+*.pyc
+*.pyo
+
+# 系统生成文件
+sway/.config/sway/msg.txt
+sway/.config/sway/generated_background.svg
+
+# fcitx5 运行期文件
+fcitx5/.config/fcitx5/conf/cached_layouts
+fcitx5/.config/fcitx5/conf/*_[A-Za-z0-9]*
+
+# 包列表备份（可选提交，按需取消注释）
+# pkglist.txt
