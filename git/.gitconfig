@@ -1,11 +1,6 @@
-# [url "https://ghproxy.com/https://github"]
-#         insteadOf = https://github
-[http]
-        sslverify = false
-        lowSpeedLimit = 0
-        lowSpeedTime = 999999
-        postBuffer = 1048576000
-        version = HTTP/1.1
+[include]
+    path = ~/.gitconfig.local
+
 [oh-my-zsh]
         hide-status = 1
         hide-dirty = 1
@@ -44,8 +39,6 @@
 	smudge = git-lfs smudge -- %f
 	process = git-lfs filter-process
 	required = true
-[credential]
-	helper = store
 [init]
 	defaultBranch = master
 [pull]
@@ -62,8 +55,6 @@
     # Choose one of these 2 lines
     cmd = meld "$LOCAL" "$MERGED" "$REMOTE" --output "$MERGED"
     #cmd = meld "$LOCAL" "$BASE" "$REMOTE" --output "$MERGED"
-[credential]
-        helper = store
 [commit]
         template = ~/.gitmessage.txt
 [core]

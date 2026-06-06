@@ -1,0 +1,22 @@
+# ~/.gitconfig.local — 本机私密配置，不纳入版本管理
+# 将此文件复制为 ~/.gitconfig.local 并填入你的信息
+
+[user]
+    name = Your Name
+    email = your.email@example.com
+
+# 网络设置 (按需启用)
+#[http]
+#    sslVerify = false
+#    lowSpeedLimit = 0
+#    lowSpeedTime = 999999
+#    postBuffer = 1048576000
+#    version = HTTP/1.1
+
+# GitHub 代理 (按需启用)
+#[url "https://ghproxy.com/https://github"]
+#    insteadOf = https://github
+
+# 凭据存储
+[credential]
+    helper = store
