@@ -9,7 +9,7 @@ IM_PKGS   := fcitx5
 TOOL_PKGS := git
 
 .PHONY: help stow unstow restow adopt check verify list pkglist backup deps clean purge hooks install all
-.PHONY: stow-gui stow-cli stow-im stow-tool
+.PHONY: stow-gui stow-cli stow-im stow-tool xdg-backup xdg-restore
 
 ## 默认: 安装所有
 all: hooks stow
@@ -42,6 +42,8 @@ help:
 	@echo "  purge      删除包列表备份"
 	@echo "  hooks      安装 git hooks"
 	@echo "  install    完整安装 (submodule + stow + hooks)"
+	@echo "  xdg-backup  备份 XDG 状态/历史到当前目录"
+	@echo "  xdg-restore 从当前目录恢复 XDG 状态/历史"
 
 ## 列出所有包
 list:
@@ -168,3 +170,16 @@ hooks:
 
 ## 完整安装
 install: submodule hooks stow
+
+## 备份 XDG 状态目录 (history 等) 到仓库外的临时位置
+xdg-backup:
+	@mkdir -p /tmp/dotfiles-xdg-backup/state/zsh
+	@mkdir -p /tmp/dotfiles-xdg-backup/cache
+	@cp -u ~/.local/state/zsh/history /tmp/dotfiles-xdg-backup/state/zsh/ 2>/dev/null || true
+	@echo "[+] 备份到 /tmp/dotfiles-xdg-backup/"
+
+## 恢复 XDG 状态
+xdg-restore:
+	@mkdir -p ~/.local/state/zsh
+	@cp -u /tmp/dotfiles-xdg-backup/state/zsh/history ~/.local/state/zsh/ 2>/dev/null || true
+	@echo "[+] 恢复完成"

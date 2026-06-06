@@ -18,5 +18,10 @@ sway/.config/sway/generated_background.svg
 fcitx5/.config/fcitx5/conf/cached_layouts
 fcitx5/.config/fcitx5/conf/*_[A-Za-z0-9]*
 
+# XDG 规范 (状态/缓存) 镜像，仓库内不需要
+# (这些文件原本就在仓库外，仅作记录)
+# ~/.local/state/zsh/history
+# ~/.cache/zsh/zcompcache
+
 # 包列表备份（可选提交，按需取消注释）
 # pkglist.txt

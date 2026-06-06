@@ -1,6 +1,9 @@
 # If you come from bash you might have to change your $PATH.
 # export PATH=$HOME/bin:/usr/local/bin:$PATH
 
+# XDG Base Directory 规范 (历史、缓存等归位)
+[ -f "$HOME/.config/zsh/xdg.sh" ] && source "$HOME/.config/zsh/xdg.sh"
+
 # Path to your oh-my-zsh installation.
 export ZSH="$HOME/.oh-my-zsh"
 
@@ -82,6 +85,15 @@ source $ZSH/oh-my-zsh.sh
 
 # User configuration
 setopt nonomatch
+
+# 补全缓存到 XDG_CACHE_HOME
+# (oh-my-zsh 默认 compinit 写到 $ZDOTDIR/.zcompdump)
+autoload -Uz compinit
+if [ -d "$ZSH_COMPDUMP" ]; then
+    compinit -d "$ZSH_COMPDUMP/$(uname -n)"
+else
+    compinit
+fi
 # export MANPATH="/usr/local/man:$MANPATH"
 
 # You may need to manually set your language environment
