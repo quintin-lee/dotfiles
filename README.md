@@ -35,8 +35,27 @@ Gnu Stow 使用两个文件夹来管理两个文件树之间的映射，分别�
 
 ## 将收集的配置文件应用到新的系统中
 
-将项目拉取到新的机器的家目录，切换到`stow dir`，执行`stow -S bash`可以将bash的配置文件展开到家目录下。
-你也可以使用多个组合命令：`stow -S pkg1 pkg2 -D pkg3 pkg4 -S pkg5 -R pkg6`
+本项目使用 `Makefile` 统一管理 stow 部署，常用命令：
+
+```sh
+make              # 部署所有包 (stow + submodule)
+make PKG=zsh      # 只部署单个包
+make check        # 检查冲突
+make verify       # 验证符号链接
+make adopt        # 采纳本地文件覆盖仓库
+make restow       # 重新链接
+make unstow       # 移除所有链接
+make pkglist      # 导出系统已安装包
+make deps         # 从 pkglist.txt 安装软件
+make help         # 查看完整帮助
+```
+
+如需手动调用 stow，等价命令是：
+```sh
+stow -d . -t $HOME -S bash
+```
+
+也可以使用多个组合命令：`stow -S pkg1 pkg2 -D pkg3 pkg4 -S pkg5 -R pkg6`
 
 - `-d` 指定 stow 文件夹
 - `-t` 指定 target 文件夹

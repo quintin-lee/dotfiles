@@ -1,0 +1,24 @@
+# 强制 LF 换行 (避免跨平台协作时 Windows 用户的 CRLF 污染)
+* text=auto eol=lf
+
+# Shell 脚本必须 LF
+*.sh eol=lf
+*.bash eol=lf
+*.zsh eol=lf
+
+# 二进制文件标记
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.pdf binary
+*.woff binary
+*.woff2 binary
+*.ttf binary
+*.otf binary
+
+# diff 驱动
+*.conf diff=conf
+*.ini diff=ini
+*.gitconfig diff=ini
