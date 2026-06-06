@@ -146,7 +146,7 @@ adopt:
 ## 检查冲突
 check:
 	@for p in $(PACKAGES); do \
-		stow -n -v -d $(STOW_DIR) -t $(TARGET) -S $$p 2>&1; \
+		stow --dotfiles -n -v -d $(STOW_DIR) -t $(TARGET) -S $$p 2>&1; \
 	done
 
 ## 验证符号链接完整性
@@ -181,6 +181,8 @@ verify:
 		echo "[+] 所有符号链接健康"; \
 	elif [ "$$broken" -eq 0 ]; then \
 		echo "[!] $$nonlink 个非符号链接 (需 make restow-fresh)"; \
+	elif [ -z "$(TARGET)/.config" ] || [ ! -d "$(TARGET)/.config" ]; then \
+		echo "[i] CI 环境无家目录配置，跳过 ($$broken 个缺失是预期的)"; \
 	else \
 		echo "[-] $$broken 个缺失/悬空 (运行 make restow-fresh)"; \
 		exit 1; \

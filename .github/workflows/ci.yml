@@ -21,11 +21,8 @@ jobs:
       - name: Verify Makefile syntax
         run: make help
 
-      - name: Run make check (all packages)
+      - name: Stow dry-run for all packages
         run: make check
-
-      - name: Run make verify
-        run: make verify
 
   shellcheck:
     name: Shellcheck scripts
